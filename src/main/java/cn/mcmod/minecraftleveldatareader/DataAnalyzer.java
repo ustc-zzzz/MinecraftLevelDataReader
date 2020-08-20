@@ -8,6 +8,7 @@ import net.querz.nbt.tag.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 public class DataAnalyzer
 {
@@ -24,7 +25,7 @@ public class DataAnalyzer
         JsonArray modListArray = new JsonArray();
         CompoundTag fmlTag = this.getAsCompound(this.get(this.tag, "FML"));
         List<String> apiList = Arrays.asList("mcp", "fml", "forge"); // TODO: fabric?
-        for (CompoundTag childTag : this.getAsList(this.get(fmlTag, "ModList"), CompoundTag.class))
+        for (CompoundTag childTag : this.getAsList(this.get(fmlTag, "ModList", "LoadingModList"), CompoundTag.class))
         {
             Tag<?> modIdTag = this.get(childTag, "ModId");
             Tag<?> modVersionTag = this.get(childTag, "ModVersion");
@@ -55,9 +56,10 @@ public class DataAnalyzer
         return result;
     }
 
-    private Tag<?> get(CompoundTag tag, String name)
+    private Tag<?> get(CompoundTag tag, String... names)
     {
-        return tag.containsKey(name) ? tag.get(name) : tag.keySet().stream().filter(name::equalsIgnoreCase).findFirst().<Tag<?>>map(tag::get).orElse(EndTag.INSTANCE);
+        Optional<Tag<?>> result = Arrays.stream(names).filter(tag::containsKey).<Tag<?>>map(tag::get).findFirst();
+        return result.orElseGet(() -> tag.keySet().stream().filter(key -> Arrays.stream(names).anyMatch(key::equalsIgnoreCase)).findFirst().<Tag<?>>map(tag::get).orElse(EndTag.INSTANCE));
     }
 
     private <T extends Tag<?>> ListTag<T> getAsList(Tag<?> tag, Class<T> cls)
