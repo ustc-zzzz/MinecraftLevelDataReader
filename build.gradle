@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'net.kyori.blossom' version '1.1.0'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+version '1.0.0'
+group 'cn.mcmod'
+description 'A simple tool to read level.dat (1.7.10+) and output mod information as json'
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    jcenter()
+    maven {
+        name 'jitpack'
+        url 'https://jitpack.io/'
+    }
+}
+
+dependencies {
+    implementation 'com.github.Querz:NBT:5.5'
+    implementation 'com.google.code.gson:gson:2.6.2'
+}
+
+application {
+    mainClassName = 'cn.mcmod.minecraftleveldatareader.Main'
+}
+
+jar {
+    archiveClassifier.set('pure')
+}
+
+blossom {
+    replaceToken '@version@', project.version
+    replaceToken '@description@', project.description
+    replaceToken '@website@', 'https://github.com/ustc-zzzz/MinecraftLevelDataReader'
+}
+
+shadowJar {
+    minimize()
+    archiveClassifier.set(null)
+    relocate('net.querz', 'cn.mcmod.minecraftleveldatareader.repackage.net.querz')
+    relocate('com.google', 'cn.mcmod.minecraftleveldatareader.repackage.com.google')
+}
